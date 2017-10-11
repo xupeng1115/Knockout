@@ -16,9 +16,27 @@
 <body>
 	<h3>Meal upgrades</h3>
 	<p>Make your flight more bearable by selecting a meal to match your social and economic status.</p>
-	Chosen meal: <select data-bind="options:oMeals,optionsText:'mealName'"></select>
+	Chosen meal: <select data-bind="options:oMeals,optionsText:'mealName',value:chosenMeal"></select>
+	<p>
+		You've chosen:
+		<b data-bind="text:chosenMeal().description"></b>
+		<div>
+			(price:<span data-bind="text:formatPrice(chosenMeal().extraCost)"></span>)
+		</div>
+		<div>
+			(price:<span data-bind="text:formatPrice(chosenMeal().extraCost)"></span>)
+		</div>
+		<div>
+			(price:<span data-bind="text:FormatPriceTwo"></span>)
+		</div>
+	</p>
 	<div data-bind="text:oData.name"></div>
-	
+	<div>
+		<span data-bind="click:Add">点击加一</span>
+	</div>
+	<div>
+		<span data-bind="text:One"></span>
+	</div>
 <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
 <script type="text/javascript" src="js/knockout.min.js"></script>
 <script>
@@ -35,10 +53,25 @@
 </script>
 <script>
 	var vm={
-		
+		One:ko.observable(0),
+		chosenMeal:ko.observable(oMeals[0]),
+		FormatPrice:function(price){
+			return price==0?"Free":"$"+price.toFixed(2);
+		},
+		Add:function(){
+			this.One(this.One()+1);
+		}
 	}
 	
+	vm.FormatPriceTwo=ko.dependentObservable(function(){
+		return this.chosenMeal().extraCost==0?"Free":"$"+this.chosenMeal().extraCost.toFixed(2);
+	},vm)
+	
 	ko.applyBindings(vm);
+	
+	function formatPrice(price){
+		return price==0?"Free":"$"+price.toFixed(2);
+	}
 	
 </script>
 </body>
