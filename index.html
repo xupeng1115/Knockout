@@ -14,29 +14,56 @@
 	</style>
 </head>
 <body>
-	<h3>Meal upgrades</h3>
-	<p>Make your flight more bearable by selecting a meal to match your social and economic status.</p>
-	Chosen meal: <select data-bind="options:oMeals,optionsText:'mealName',value:chosenMeal"></select>
-	<p>
-		You've chosen:
-		<b data-bind="text:chosenMeal().description"></b>
+	<div class="container1">
+		<h3>Meal upgrades</h3>
+		<p>Make your flight more bearable by selecting a meal to match your social and economic status.</p>
+		Chosen meal: <select data-bind="options:oMeals,optionsText:'mealName',value:chosenMeal"></select>
+		<p>
+			You've chosen:
+			<b data-bind="text:chosenMeal().description"></b>
+			<div>
+				(price:<span data-bind="text:FormatPrice(chosenMeal().extraCost)"></span>)
+			</div>
+			<div>
+				(price:<span data-bind="text:formatPrice(chosenMeal().extraCost)"></span>)
+			</div>
+			<div>
+				(price:<span data-bind="text:FormatPriceTwo"></span>)
+			</div>
+		</p>
+		<div data-bind="text:oData.name"></div>
 		<div>
-			(price:<span data-bind="text:formatPrice(chosenMeal().extraCost)"></span>)
+			<span data-bind="click:Add">点击加一</span>
 		</div>
 		<div>
-			(price:<span data-bind="text:formatPrice(chosenMeal().extraCost)"></span>)
+			<span data-bind="text:One"></span>
 		</div>
+		
 		<div>
-			(price:<span data-bind="text:FormatPriceTwo"></span>)
+			<div data-bind="foreach:Meals">
+				<div data-bind="text:'$'+formatPrice(extraCost)"></div>
+			</div>
+			<div data-bind="foreach:Meals">
+				<div data-bind="text:'$'+vm.FormatPrice(extraCost)"></div>
+			</div>
+			<div data-bind="foreach:Meals">
+				<div data-bind="text:'$'+$parent.FormatPrice(extraCost)"></div>
+			</div>
+			<div data-bind="foreach:Meals">
+				<div data-bind="text:'$'+$root.FormatPrice(extraCost)"></div>
+			</div>
 		</div>
-	</p>
-	<div data-bind="text:oData.name"></div>
-	<div>
-		<span data-bind="click:Add">点击加一</span>
 	</div>
-	<div>
-		<span data-bind="text:One"></span>
+	<div class="container2">
+		<div data-bind="foreach:Meals">
+			<div style="color:#ff6060;">$<span data-bind="text:formatPrice(extraCost)"></span></div>
+		</div>
+		<div style="color:green" data-bind="text:Name()"></div>
+		<div style="color:green" data-bind="text:Age()"></div>
+		<div style="color:green" data-bind="text:Work()"></div>
 	</div>
+	
+	
 <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
 <script type="text/javascript" src="js/knockout.min.js"></script>
 <script>
@@ -55,6 +82,7 @@
 	var vm={
 		One:ko.observable(0),
 		chosenMeal:ko.observable(oMeals[0]),
+		Meals:ko.observableArray(oMeals),
 		FormatPrice:function(price){
 			return price==0?"Free":"$"+price.toFixed(2);
 		},
@@ -63,16 +91,60 @@
 		}
 	}
 	
+	var vm2={
+		Meals:ko.observableArray(oMeals),
+		Name:ko.observable(oData.name),
+		Age:ko.observable(oData.age),
+		Work:ko.observable(oData.work)
+	}
+	
+	
+	
+	//依赖监控属性
 	vm.FormatPriceTwo=ko.dependentObservable(function(){
 		return this.chosenMeal().extraCost==0?"Free":"$"+this.chosenMeal().extraCost.toFixed(2);
 	},vm)
 	
-	ko.applyBindings(vm);
+	
+	
+	//监控属性的显示订阅
+	vm2.Name.subscribe(function(newValue){
+		console.log(newValue+": "+newValue.length);
+	})
+	
+	var oAge=vm2.Age.subscribe(function(newValue){
+		if(newValue<100){
+			console.log(newValue+": "+newValue);
+		}else{
+			console.log(newValue+": *************");
+			console.log(this);
+			//停止订阅
+			this.dispose();
+		}
+	})
+	
+	ko.applyBindings(vm,document.getElementsByClassName("container1")[0]);
+	ko.applyBindings(vm2,document.getElementsByClassName("container2")[0]);
 	
 	function formatPrice(price){
 		return price==0?"Free":"$"+price.toFixed(2);
 	}
 	
+	$(function(){
+		vm2.Name("AB").Age(20).Work("mote");
+		console.log(vm2.Age);
+		
+		function getFun1(value){
+			console.log(value);
+		}
+		
+		function getFun2(value){
+			return value;
+		}
+		
+		getFun2(getFun1(2));
+		
+	}())
 </script>
 </body>
 </html>
