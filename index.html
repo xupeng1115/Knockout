@@ -61,12 +61,44 @@
 		<div style="color:green" data-bind="text:Name()"></div>
 		<div style="color:green" data-bind="text:Age()"></div>
 		<div style="color:green" data-bind="text:Work()"></div>
+		<div style="font-size:20px;">
+			<div data-bind="text:First"></div>
+			<div data-bind="text:Last"></div>
+			<div data-bind="text:First()+Last()"></div>
+			<div data-bind="text:FullName()"></div>
+		</div> 
+		<div>
+			<div>
+				Enter bid price: <input type="text" data-bind="value:FormatPrice2"/>
+			</div>
+			<div data-bind="text:Price()"></div>
+			<div data-bind="visible: !LastInputValid()">That's not a number!</div>
+			<div data-bind="text:Data().name"></div>
+		</div>
+		<div data-bind="foreach:Meals">
+			<div>
+				<span data-bind="text:mealName"></span>******* <span data-bind="text:description"></span>************* <span data-bind="text:extraCost"></span>
+			</div>
+		</div>
+		<div data-bind="foreach:Num">
+			<div data-bind="text:name"></div>
+		</div>
+		<div data-bind="foreach:Array1">
+			<div style="color:#ff6060;font-size:20px;" data-bind="text:name"></div>
+			<div style="color:green;font-size:18px;" data-bind="foreach:arr">
+				<div data-bind="text:age"></div>
+			</div>
+		</div>
+		
+		
 	</div>
-	
 	
 <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
 <script type="text/javascript" src="js/knockout.min.js"></script>
 <script>
+	var oPrice=0;
+	var oFirst="xiaoming";
+	var oLast="AB";
 	var oData={
 		name:"xiaoming",
 		age:"40",
@@ -77,6 +109,41 @@
     	{ mealName: 'Premium', description: 'Fresh bread with cheese', extraCost: 9.95 },
     	{ mealName: 'Deluxe', description: 'Caviar and vintage Dr Pepper', extraCost:18.50} 
 	]
+	
+	var oNum=[
+		{name:"a"},
+		{name:"b"},
+		{name:"c"}
+	]
+	
+	var oArray=[
+		{
+			name:"a",
+			arr:[
+				{age:10},
+				{age:20},
+				{age:30}
+			]
+		},
+		{
+			name:"b",
+			arr:[
+				{age:40},
+				{age:50},
+				{age:60}
+			]
+		},
+		{
+			name:"c",
+			arr:[
+				{age:70},
+				{age:80},
+				{age:90}
+			]
+		}
+	]
+	
+	
 </script>
 <script>
 	var vm={
@@ -92,20 +159,18 @@
 	}
 	
 	var vm2={
+		Price:ko.observable(0),
+		First:ko.observable(oFirst),
+		Last:ko.observable(oLast),
 		Meals:ko.observableArray(oMeals),
 		Name:ko.observable(oData.name),
 		Age:ko.observable(oData.age),
-		Work:ko.observable(oData.work)
+		Work:ko.observable(oData.work),
+		LastInputValid:ko.observable(true),
+		Data:ko.observable(oData),
+		Num:ko.observableArray(oNum),
+		Array1:ko.observableArray(oArray)
 	}
-	
-	
-	
-	//依赖监控属性
-	vm.FormatPriceTwo=ko.dependentObservable(function(){
-		return this.chosenMeal().extraCost==0?"Free":"$"+this.chosenMeal().extraCost.toFixed(2);
-	},vm)
-	
-	
 	
 	//监控属性的显示订阅
 	vm2.Name.subscribe(function(newValue){
@@ -122,6 +187,48 @@
 			this.dispose();
 		}
 	})
+	
+	var oPrice2=vm2.Price.subscribe(function(newValue){
+		if(newValue<100){
+			console.log(newValue+": "+newValue);
+		}else{
+			console.log(newValue+": *************");
+			console.log(this);
+			//停止订阅
+			this.dispose();
+		}
+	})
+	
+	//依赖监控属性
+	vm.FormatPriceTwo=ko.dependentObservable(function(){
+		return this.chosenMeal().extraCost==0?"Free":"$"+this.chosenMeal().extraCost.toFixed(2);
+	},vm)
+	
+	vm2.FullName=ko.dependentObservable({
+		read:function(){
+			return this.First()+this.Last();
+		},
+		write:function(value){
+			this.First(value+"kkkkk");
+		}
+	},vm2)
+	
+	//依赖监控属性可写
+	vm2.FormatPrice2=ko.dependentObservable({
+		read:function(){
+			return "$"+this.Price().toFixed(2);
+		},
+		write:function(value){
+			var value=parseFloat(value.replace(/[^\.\d]/g,""));
+			if(isNaN(value)){
+				this.LastInputValid(false);
+			}else{
+				this.LastInputValid(true);
+				this.Price(isNaN(value)?0:value);
+			}
+		}
+	},vm2)
+	
 	
 	ko.applyBindings(vm,document.getElementsByClassName("container1")[0]);
 	ko.applyBindings(vm2,document.getElementsByClassName("container2")[0]);
