@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<style>
+		*{
+			margin:0;
+			padding:0;
+		}
+		.red{
+			color:#ff6060;
+		}
+	</style>
+</head>
+<body>
+	<h2>Participants</h2>
+	Here are the participants:
+	<div data-bind="template: { name: 'person-template', data: buyer }"></div>
+	<div data-bind="template: { name: 'person-template', data: seller }"></div>
+ 
+	<script type="text/html" id="person-template">
+	    <h3 data-bind="text: name"></h3>
+	    <p>Credits: <span data-bind="text: credits"></span></p>
+	</script>
+	
+<script type="text/javascript" src="../js/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="../js/knockout.min.js"></script>
+
+<script type="text/javascript">
+//	function MyViewModel() {
+//       this.buyer = { name: 'Franklin', credits: 250 };
+//       this.seller = { name: 'Mario', credits: 5800 };
+//  }
+//  ko.applyBindings(new MyViewModel());
+    var viewModel = {
+        buyer:{ name: "Economy", credits: 199.95 },
+        seller:{ name: "Business", credits: 449.22 },
+    };
+    ko.applyBindings(viewModel);
+</script>
+</body>
+</html>
