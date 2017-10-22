@@ -81,7 +81,10 @@
 			</div>
 		</div>
 		<div data-bind="foreach:Num">
-			<div data-bind="text:name"></div>
+			<!-- ko if:(name!=="a") -->
+			<div data-bind="click:$parent.myNum2.bind($data,event,$index())"><span data-bind="text:name"></span></div>
+			<!-- /ko -->
+			<div data-bind="click:$parent.myNum" class="ddd"><!--ko text: name--><!--/ko--></div>
 		</div>
 		<div data-bind="foreach:Array1">
 			<div style="color:#ff6060;font-size:20px;" data-bind="text:name"></div>
@@ -89,7 +92,47 @@
 				<div data-bind="text:age"></div>
 			</div>
 		</div>
-		
+		<div>
+			this Full is : <span data-bind="text:Full"></span>
+		</div>
+		<div>
+			this FullName is: <span data-bind="text:FullName"></span>
+		</div>
+		<div>
+			this PureFull is: <span data-bind="text:PureFull"></span>
+		</div>
+		<div>
+			this MyFull is: <span data-bind="text:MyFull()"></span>
+		</div>
+		<div>
+			<div>First name: <span data-bind="text: First"></span></div>
+			<div>Last name: <span data-bind="text: Last"></span></div>
+			<div class="heading">Hello, <input data-bind="textInput: fullName2"/></div>
+		</div>
+		<div>
+			<div class="heading">
+			    <input type="checkbox" data-bind="checked: selectedAllProduce" title="Select all/none"/> Produce
+			</div>
+			<div data-bind="foreach: produce">
+			    <label>
+			        <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.selectedProduce"/>
+			        <span data-bind="text: $data"></span>
+			    </label>
+			</div>
+		</div>
+		<div>
+			<div>Enter a numeric value: <input data-bind="textInput: attemptedValue"/></div>
+			<div class="error" data-bind="visible: !lastInputWasValid()">That's not a number!</div>
+			<div>(Accepted value: <span data-bind="text: acceptedNumericValue"></span>)</div>
+		</div>
+		<div>
+			<a data-bind="attr:{href:Url}">百度一下</a>
+		</div>
+		<div>
+			<button data-bind="click: myFunction">
+			    Click me
+			</button>
+		</div>
 		
 	</div>
 	
@@ -169,13 +212,50 @@
 		LastInputValid:ko.observable(true),
 		Data:ko.observable(oData),
 		Num:ko.observableArray(oNum),
-		Array1:ko.observableArray(oArray)
+		Array1:ko.observableArray(oArray),
+		pd:ko.observable(1),
+		produce:['Apple','Banana','Celery','Corn','Orange','Spinach'],
+		selectedProduce:ko.observableArray(['Corn','Orange']),
+		acceptedNumericValue:ko.observable(123),
+    	lastInputWasValid:ko.observable(true),
+    	Url:ko.observable(""),
+		MyFull:function(){
+			return this.First()+this.Last();
+		},
+		myFunction: function(data, event) {
+			console.log(data);
+			console.log(event);
+            if (event.shiftKey) {
+                alert(345);
+            } else {
+               	alert(444);
+            }
+        },
+        myNum:function(data, event){
+        	console.log(data);
+			console.log(event.target.className);
+        },
+        myNum2:function(data, event,index){
+        	console.log(event);
+        	console.log(data);
+			console.log(index);
+        }
 	}
 	
 	//监控属性的显示订阅
 	vm2.Name.subscribe(function(newValue){
 		console.log(newValue+": "+newValue.length);
 	})
+	
+	vm2.pd.subscribe(function(newValue) {
+	    alert("The pd's new name is " + newValue);
+	});
+	
+	//当一个observable的属性有初始值(number,string,true/false,null)时，可以使用内置的notifiy,当新的值写入时始终都会得到监控，即使这些值都是相同的
+	vm2.pd.extend({ notify: 'always' });
+	//为了避免频繁的更新带来的请求代价，可以通过限制监控速率来实现延时监控;
+	vm2.pd.extend({rateLimit:2000});		//两秒后执行监控
+	vm2.Num.extend({rateLimit:3000});		//延迟3秒监控并更新数组
 	
 	var oAge=vm2.Age.subscribe(function(newValue){
 		if(newValue<100){
@@ -204,6 +284,24 @@
 		return this.chosenMeal().extraCost==0?"Free":"$"+this.chosenMeal().extraCost.toFixed(2);
 	},vm)
 	
+	//计算监控属性Computed Observable
+	vm2.Full=ko.computed(function(){
+		return this.First()+this.Last();
+	},vm2)
+	
+	//防止内存泄露，减少不必要的开销;noify属性强制通知并监控
+	vm2.PureFull=ko.pureComputed(function(){
+		return this.First()+this.Last();
+	},vm2);
+	
+	vm2.PureFull.subscribe(function(newValue) {
+	    alert("The pd's new PureFull is " + newValue);
+	});
+	
+	vm2.PureFull.extend({ notify: 'always' });
+	
+	vm2.PureFull.extend({ rateLimit:1000 });
+	
 	vm2.FullName=ko.dependentObservable({
 		read:function(){
 			return this.First()+this.Last();
@@ -211,7 +309,30 @@
 		write:function(value){
 			this.First(value+"kkkkk");
 		}
-	},vm2)
+	},vm2);
+	
+	//可写的计算监控属性
+	vm2.fullName2=ko.pureComputed({
+		read:function(){
+			return this.First()+" "+this.Last();
+		},
+		write:function(value){
+			var lastSpacePos=value.lastIndexOf(" ");
+			if(lastSpacePos>0){
+				this.First(value.substring(0,lastSpacePos));
+				this.Last(value.substring(lastSpacePos+1));
+			}
+		}
+	},vm2);
+	
+	vm2.selectedAllProduce=ko.pureComputed({
+		read:function(){
+			return this.selectedProduce().length===this.produce.length;
+		},
+		write:function(value){
+			this.selectedProduce(value?this.produce.slice(0):[]);
+		}
+	},vm2);
 	
 	//依赖监控属性可写
 	vm2.FormatPrice2=ko.dependentObservable({
@@ -229,7 +350,34 @@
 		}
 	},vm2)
 	
-	
+	vm2.attemptedValue = ko.pureComputed({
+        read: function(){
+        	return this.acceptedNumericValue();
+        },
+        write: function (value) {
+            if (isNaN(value))
+                this.lastInputWasValid(false);
+            else {
+                this.lastInputWasValid(true);
+                this.acceptedNumericValue(value); // Write to underlying storage
+            }
+        }
+    },vm2);
+    
+    //依赖项变化时发送请求
+    ko.computed(function(){
+    	var params={
+    		First:this.First(),
+    		Last:this.Last(),
+    		Num:this.Num(),
+    		Price:this.Price.peek()		//peek方法使Price属性的变化被忽略,price属性变化时不会触发此计算属性函数
+    	};
+    	$.getJSON('one.json',params,function(data){
+    		console.log(data.Url+"hhhhhhhhhhhh");
+    		vm2.Url(data);
+    	})
+    },vm2)
+    
 	ko.applyBindings(vm,document.getElementsByClassName("container1")[0]);
 	ko.applyBindings(vm2,document.getElementsByClassName("container2")[0]);
 	
