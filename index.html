@@ -81,7 +81,7 @@
 			</div>
 		</div>
 		<div data-bind="foreach:Num">
-			<div data-bind="text:name"></div>
+			<div data-bind="text:name,click:vm2.ClickNum"></div>
 		</div>
 		<div data-bind="foreach:Array1">
 			<div style="color:#ff6060;font-size:20px;" data-bind="text:name"></div>
@@ -89,7 +89,38 @@
 				<div data-bind="text:age"></div>
 			</div>
 		</div>
-		
+		<div style="width:100px;height:40px;line-height:40px;text-align:center;font-size:20px;"></div>
+		<div>
+			<a target="_blank" data-bind="text:'白度一下',attr:{href:'https://www.baidu.com'},click:ClickHref"></a>
+		</div>
+		<div>
+			<input type="text" data-bind="enable:InputKey"/>
+			<textarea name="" id="" cols="30" rows="10" data-bind="enable:InputKey"></textarea>
+		</div>
+		<div>
+			<p>Send me spam: <input type="checkbox" data-bind="checked: wantsSpam"/></p>
+			<div data-bind="visible: wantsSpam">
+			    Preferred flavors of spam:
+			    <div><input type="checkbox" value="cherry" data-bind="checked: spamFlavors"/> Cherry</div>
+			    <div><input type="checkbox" value="almond" data-bind="checked: spamFlavors"/> Almond</div>
+			    <div><input type="checkbox" value="msg" data-bind="checked: spamFlavors"/> Monosodium Glutamate</div>
+			</div>
+		</div>
+		<div>
+			<label><input type="checkbox" data-bind="checked: displayMessage" /> Display message</label>
+ 
+			<div data-bind="if: displayMessage">Here is a message. Astonishing.</div>
+		</div>
+		<div>
+			<ul data-bind="foreach: planets">
+			    <li>
+			        Planet: <b data-bind="text: name"> </b>
+			        <div data-bind="if: capital">
+			            Capital: <b data-bind="text: capital.cityName"> </b>
+			        </div>
+			    </li>
+			</ul>
+		</div>
 		
 	</div>
 	
@@ -169,7 +200,24 @@
 		LastInputValid:ko.observable(true),
 		Data:ko.observable(oData),
 		Num:ko.observableArray(oNum),
-		Array1:ko.observableArray(oArray)
+		Array1:ko.observableArray(oArray),
+		InputKey:ko.observable(false),
+		wantsSpam: ko.observable(true),
+        spamFlavors: ko.observableArray(["cherry", "almond"]),
+        displayMessage: ko.observable(false),
+        planets: [
+            { name: 'Mercury', capital: null }, 
+            { name: 'Earth', capital: { cityName: 'Barnsley' } }        
+        ],
+		ClickNum:function(event){
+			console.log(event);
+			console.log(event);
+			console.log(event.name);
+		},
+		ClickHref:function(){
+			console.log(44);
+			return true;
+		}
 	}
 	
 	//监控属性的显示订阅
@@ -229,7 +277,6 @@
 		}
 	},vm2)
 	
-	
 	ko.applyBindings(vm,document.getElementsByClassName("container1")[0]);
 	ko.applyBindings(vm2,document.getElementsByClassName("container2")[0]);
 	
@@ -255,6 +302,4 @@
 </script>
 </body>
 </html>
-
-
 

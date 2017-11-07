@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<div id="container1">
+		<div data-bind="text:One"></div>
+		<div data-bind="text:Two"></div>
+		<div data-bind="text:Last"></div>
+		<div data-bind="text:First"></div>
+		<div data-bind="text:FullName"></div>
+		<button data-bind="click:Add">加1</button>
+		<div data-bind="foreach:{data:Datas,as:'items'}">
+			<div style="font-size:20px;color:#ff6060;">
+				<span data-bind="text:name"></span>
+				<span data-bind="text:age"></span>
+				<span><!--ko text: name--><!--/ko--></span>
+			</div>
+			<div data-bind="foreach:{data:friends,as:'item'}">
+				<div style="font-size:16px;color:#333;">
+					<span data-bind="text:items.name"></span>
+					<span data-bind="text:items.age"></span>
+					<span data-bind="text:name"></span>
+					<span data-bind="text:age"></span>
+				</div>
+			</div>
+		</div>
+		<div data-bind="foreach:Friends">
+			<div style="font-size:16px;color:green;">
+				<span data-bind="text:name"></span>
+				<span data-bind="text:age"></span>
+			</div>
+		</div>
+		<div>
+			<div data-bind="text:Last"></div>
+			<div data-bind="text:First"></div>
+			<div>
+				Hello, <input type="text" data-bind="textInput:FullName"/>
+			</div>
+		</div>
+		<div>
+			<div class="heading">
+			    <input type="checkbox" data-bind="checked: selectedAllProduce" title="Select all/none"/> Produce
+			</div>
+			<div data-bind="foreach: produce">
+			    <label>
+			        <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.selectedProduce"/>
+			        <span data-bind="text: $data"></span>
+			    </label>
+			</div>
+		</div>
+		<div>
+			<div>Enter bid price: <input data-bind="textInput: formattedPrice"/></div>
+			<div>(Raw value: <span data-bind="text: price"></span>)</div>
+		</div>
+		<div>
+			<!-- ko foreach: Datas -->
+			<div style="font-size:20px;color:#ff6060;">
+				<span data-bind="text:name"></span>
+				<span data-bind="text:age"></span>
+				<span><!--ko text: name--><!--/ko--></span>
+			</div>
+			<div data-bind="foreach:friends">
+				<div style="font-size:16px;color:#333;">
+					<span data-bind="text:name"></span>
+					<span data-bind="text:age"></span>
+				</div>
+			</div>
+			<!-- /ko -->
+		</div>
+		<div>
+			<h4>First instance,without parameters</h4>
+			<div data-bind='component: "message-editor"'></div>
+			<h4>Second instance, passing parameters</h4>
+			<div data-bind='component: {
+			    name: "message-editor",
+			    params: { initialText: "Hello, world!" }
+			}'></div>
+		</div>
+	</div>
+	
+	<div id="container2">
+		<div data-bind="text:One"></div>
+		<div data-bind="text:Name"></div>
+		<button data-bind="click:Add">点击</button>
+		<div data-bind="foreach:List">
+			<div style="font-size:16px;color:blue;">
+				<span data-bind="text:index"></span>
+				<span data-bind="text:num"></span>
+			</div>
+		</div>
+		<div data-bind="text:LastName">
+			
+		</div>
+		<div data-bind="text:FirstName">
+			
+		</div>
+		<div data-bind="text:AllName()">
+			
+		</div>
+		<div data-bind="text:FullName"></div>
+		<div data-bind="text:FullName2"></div>
+	</div>
+	
+<script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+<!--<script type="text/javascript" src="js/knockout.min.js"></script>-->
+<script type="text/javascript" src="js/knockout.min-3.4.2.js"></script>
+<script>
+	var Datas=[
+		{
+			"name":"xiaoming",
+			"age":40,
+			"friends":[
+				{
+					"name":"A",
+					"age":10
+				},
+				{
+					"name":"B",
+					"age":20
+				},
+				{
+					"name":"C",
+					"age":30
+				}
+			]
+		},
+		{
+			"name":"AB",
+			"age":20,
+			"txt":"我是text",
+			"friends":[
+				{
+					"name":"a",
+					"age":100
+				},
+				{
+					"name":"b",
+					"age":200
+				},
+				{
+					"name":"c",
+					"age":300
+				}
+			]
+		},
+		{
+			"name":"ketty",
+			"age":10,
+			"friends":[
+				{
+					"name":"Aa",
+					"age":1000
+				},
+				{
+					"name":"Bb",
+					"age":2000
+				},
+				{
+					"name":"Cc",
+					"age":3000
+				}
+			]
+		}
+	]
+	var vm={
+		A:10,
+		Last:ko.observable("a"),
+		First:ko.observable("b"),
+		Datas:ko.observableArray(Datas),
+		Friends:ko.observableArray(Datas[0].friends),
+		One:ko.observable(1),
+		Two:ko.observable(2),
+		produce:[ 'Apple', 'Banana', 'Celery', 'Corn', 'Orange', 'Spinach' ],
+    	selectedProduce:ko.observableArray([ 'Corn', 'Orange' ]),
+    	price:ko.observable(25.99),
+		Add:function(){
+			var num=vm.One();
+			if(num===110){
+				console.log(scribleEnd);
+				scribleEnd.dispose();
+			}
+			if(num===120){
+				scribleBegin.dispose();
+			}
+			if(num===125){
+				vm.One.extend({ rateLimit: 2000});
+				vm.Two(300);
+			}
+			if(num===130){
+				vm.One(6);
+				num=vm.One();
+			}
+//			Datas[0].friends.splice(0,1);
+			Datas[0].friends[0].name='aAbB';
+			var Datas1=$.extend(true, [], Datas[0].friends);
+			vm.Friends(Datas1);
+			var Datas2=$.extend(true, [], Datas);
+			vm.Datas(Datas2);
+			
+			console.log(Datas);
+			num+=1;
+			vm.One(num);
+			
+			vm.Last("A");
+			vm.First("B");
+			
+			var result={};
+			for(var prop in vm){
+				console.log(prop);
+				if(vm.hasOwnProperty(prop)&& ko.isWritableObservable(vm[prop])){
+					result[prop]=vm[prop];
+				}
+			}
+			console.log(result);
+		}
+	}
+	vm.First.peek();
+	vm.selectedAllProduce=ko.pureComputed({
+        read: function () {
+            return this.selectedProduce().length === this.produce.length;
+        },
+        write: function (value) {
+            this.selectedProduce(value ? this.produce.slice(0) : []);
+        }
+    },vm);
+    vm.formattedPrice = ko.pureComputed({
+        read: function () {
+            return '$' + this.price().toFixed(2);
+        },
+        write: function (value) {
+            value = parseFloat(value.replace(/[^\.\d]/g, ""));
+            this.price(isNaN(value) ? 0 : value); 
+        }
+    },vm);
+	vm.FullName=ko.pureComputed({
+		read:function(){
+			return vm.Last()+" "+vm.First();
+		},
+		write:function(value){
+			var oIndex=value.lastIndexOf(" ");
+			if(oIndex>0){
+				this.Last(value.substring(0,oIndex));
+				this.First(value.substring(oIndex+1));
+			}
+		}
+	},vm).extend({rateLimit:1000});
+	
+	vm.One.extend({notify:'always'});
+	vm.Two.extend({ rateLimit: 2000});
+	var scribleEnd=vm.One.subscribe(function(newValue){
+		if(newValue===10){
+			this.One(100);
+		}
+		if(newValue===111){
+			this.One(100);
+		}
+	},vm);
+	
+	var scribleBegin=vm.One.subscribe(function(oldValue){
+		if(oldValue===8){
+//			this.One(90);
+			this.Two(90);
+		}
+		if(oldValue===111){
+			this.Two(100);
+		}
+		if(oldValue===120){
+			this.Two(120);
+		}
+	},vm,'beforeChange');
+	
+	ko.components.register('message-editor',{
+		viewModel:function(params){
+			this.text=ko.observable(params&&params.initialText||'');
+		},
+		template:'Message:<input data-bind="value:text"/>'
+				+'(length:<span data-bind="text:text().length"></span>)'
+	})
+	ko.components.register('my-data',{
+		viewModel:function(params){
+			this.name=params.name;
+			this.age=params.age;
+		},
+		template:'<div style="font-size:20px;color:#ff6060;"><span data-bind="text:name"></span><span data-bind="text:age"></span></div>'
+	})
+	ko.applyBindings(vm,document.getElementById("container1"));
+	
+	var List=ko.observableArray([
+		{
+			"index":'a',
+			"num":10
+		},
+		{
+			"index":'b',
+			"num":100
+		},
+		{
+			"index":'c',
+			"num":1000
+		},
+		{
+			"index":'d',
+			"num":10000
+		}
+	]);
+	
+	var Vm=function(obj){
+		this.LastName=ko.observable("xiao");
+		this.FirstName=ko.observable("ming");
+		this.One=ko.observable("一");
+		this.Name=ko.observable(obj.name);
+		this.Add=function(){
+			this.Name("AB");
+			this.One("二");
+			vm.One(1000);
+//			List.splice(0,1);
+//			List.remove({"index":'a',"num":10});
+//			List.removeAll();
+			List.remove(function(item){return item.num>100;});
+			this.LastName("Xiao");
+			this.FirstName("Ming");
+			console.log(List());
+		};
+		this.AllName=function(){
+			return this.LastName()+this.FirstName();
+		};
+		this.FullName=ko.computed(function(){
+			var isFirstEvaluation = ko.computedContext.isInitial();
+			console.log(isFirstEvaluation);
+			return this.LastName()+this.FirstName();
+		},this)
+		this.FullName2=ko.computed(function(){
+			return this.LastName()+this.FirstName();
+		},this)
+	}
+	
+	List.extend({rateLimit:1000});
+	
+	ko.applyBindings(new Vm({name:"XIAOMING",age:4000}),document.getElementById("container2"));
+	
+</script>
+	
+</body>
+</html>
