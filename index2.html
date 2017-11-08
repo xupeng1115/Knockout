@@ -174,7 +174,15 @@
 			<div data-bind="slideVisible:giftWrap,slideDutation:600">You have selected the option</div>
 			<label><input type="checkbox" data-bind="checked:giftWrap"/>Gift wrap</label>
 		</div>
+		<div>
+			<p>Name: <input type="text" data-bind="hasFocus:editingName"/></p>
+			<div data-bind="visible:editingName">You're editing the name</div>
+			<button data-bind="enable:!editingName(),click:function(){editingName(true)}">Edit name</button>
+		</div>
 	</div>
+	
+	
+	
 	<script type="text/html" id="person-template">
 		<h3 data-bind="text:name"></h3>
 		<p>Credits:<span data-bind="text:credits"></span></p>
@@ -438,7 +446,8 @@
 	]);
 	
 	var Vm=function(obj){
-		this.giftWrap=ko.observable(true);
+		this.editingName=ko.observable();
+		this.giftWrap=ko.observable(false);
 		this.seasons=ko.observableArray([
 			{ name: 'Spring', months: [ 'March', 'April', 'May' ] },
             { name: 'Summer', months: [ 'June', 'July', 'August' ] },
@@ -499,6 +508,10 @@
 	List.extend({rateLimit:1000});
 	
 	ko.bindingHandlers.slideVisible={
+		init:function(element,valueAccessor,allBindings,bindingContext){
+			var value=ko.unwrap(valueAccessor());
+			$(element).toggle(value);
+		},
 		update:function(element,valueAccessor,allBindings,bindingContext){
 			var value=valueAccessor();
 			var valueUnwrapped=ko.unwrap(value);
@@ -515,9 +528,29 @@
 			}
 		}
 	}
+	
+	ko.bindingHandlers.hasFocus={
+		init:function(element,valueAccessor,allBindings,bindingContext){
+			$(element).focus(function(){
+				var value=valueAccessor();
+				value(true);
+			});
+			$(element).blur(function(){
+				var value=valueAccessor();
+				value(false);
+			})
+		},
+		update:function(element,valueAccessor,allBindings,bindingContext){
+			var value=valueAccessor();
+			if(ko.unwrap(value)){
+				element.focus();
+			}else{
+				element.blur();
+			}
+		}
+	}
+	
 	ko.applyBindings(new Vm({name:"XIAOMING",age:4000}),document.getElementById("container2"));
-	
-	
 	
 </script>
 	
