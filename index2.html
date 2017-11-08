@@ -79,6 +79,54 @@
 			    params: { initialText: "Hello, world!" }
 			}'></div>
 		</div>
+		<div>
+			<h4>First instance,without parameters</h4>
+			<div data-bind='component: ComponentName'></div>
+			<h4>Second instance, passing parameters</h4>
+			<div data-bind='component: {
+			    name: ComponentName,
+			    params: { initialText: "Hello,world!", item: produce }
+			}'></div>
+		</div>
+		<div>
+			<my-produces params='produces:produce'></my-produces>
+		</div>
+		<div>
+			<div data-bind="foreach:produce">
+				<my-produce params='produce:$data'></my-produce>
+			</div>
+		</div>
+		<div>
+			<my-message-editor params='produce:produce[0]'></my-message-editor>
+		</div>
+		<div>
+			<my-message-editor2 params='text:Last,produce:produce[0]'></my-message-editor2>
+		</div>
+		<div>
+			<button data-bind="click:Handle">点我</button>
+		</div>
+		<div>
+			<!-- ko component: "message-editor" -->
+			<!-- /ko -->
+		</div>
+		<div>
+			<!-- ko component: {
+			    name: "message-editor",
+			    params: { initialText: "Hello, world!", otherParam: 123 }
+			} -->
+			<!-- /ko -->
+		</div>
+		<div>
+			<div data-bind='component: {
+			    name: ComponentName,
+			    params: { initialText: "Hello,world!", item: produce }
+			}'>
+			<div>
+				The person <em data-bind="text:Last"></em>
+    			is <em data-bind="text:100"></em> years old.
+			</div>
+			</div>
+		</div>
 	</div>
 	
 	<div id="container2">
@@ -102,8 +150,48 @@
 		</div>
 		<div data-bind="text:FullName"></div>
 		<div data-bind="text:FullName2"></div>
+		<div>
+			<h2>Participants</h2>
+			Here are the participants
+			<div data-bind="template:{name:'person-template',data:buyer}"></div>
+			<div data-bind="template:{name:'person-template',data:seller}"></div>
+		</div>
+		<div>
+			<h2>Participants</h2>
+			Here are the participants
+			<person-template params="data:buyer"></person-template>
+			<person-template params="data:seller"></person-template>
+		</div>
+		<div>
+			<h2>Participants</h2>
+			Here are the participants:
+			<div data-bind="template:{name:'person-template',foreach:people}"></div>
+		</div>
+		<div>
+			<ul data-bind="template:{name:'seasonTemplate',foreach:seasons,as:'season'}"></ul>
+		</div>
+		<div>
+			<div data-bind="slideVisible:giftWrap,slideDutation:600">You have selected the option</div>
+			<label><input type="checkbox" data-bind="checked:giftWrap"/>Gift wrap</label>
+		</div>
 	</div>
-	
+	<script type="text/html" id="person-template">
+		<h3 data-bind="text:name"></h3>
+		<p>Credits:<span data-bind="text:credits"></span></p>
+	</script>
+	<script type="text/html" id="seasonTemplate">
+		<li>
+			<strong data-bind="text:name"></strong>
+			<ul data-bind="template:{name:'monthTemplate',foreach:months,as:'month'}"></ul>
+		</li>
+	</script>
+	<script type="text/html" id="monthTemplate">
+		<li>
+			<span data-bind="text:month"></span>
+			is in
+			<span data-bind="text:season.name,click:$root.HandleName.bind($data,event,$index(),$element,$context,$parent,$parentContext)"></span>
+		</li>
+	</script>
 <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
 <!--<script type="text/javascript" src="js/knockout.min.js"></script>-->
 <script type="text/javascript" src="js/knockout.min-3.4.2.js"></script>
@@ -176,6 +264,7 @@
 		produce:[ 'Apple', 'Banana', 'Celery', 'Corn', 'Orange', 'Spinach' ],
     	selectedProduce:ko.observableArray([ 'Corn', 'Orange' ]),
     	price:ko.observable(25.99),
+    	ComponentName:ko.observable('message-editor'),
 		Add:function(){
 			var num=vm.One();
 			if(num===110){
@@ -215,6 +304,14 @@
 				}
 			}
 			console.log(result);
+			
+		},
+		Handle:function(){
+			if(vm.ComponentName()==='message-editor2'){
+				vm.ComponentName('message-editor');
+			}else{
+				vm.ComponentName('message-editor2');
+			}
 		}
 	}
 	vm.First.peek();
@@ -279,12 +376,45 @@
 		template:'Message:<input data-bind="value:text"/>'
 				+'(length:<span data-bind="text:text().length"></span>)'
 	})
+	ko.components.register('message-editor2',{
+		viewModel:function(params){
+			this.text=ko.observable(params&&params.initialText||'');
+			this.txt=ko.observable("sdfsdfsdfsdfsd");
+		},
+		template:'Message:<input data-bind="value:text"/>'
+				+'(length:<span data-bind="text:text().length+txt()"></span>)'
+	})
 	ko.components.register('my-data',{
 		viewModel:function(params){
 			this.name=params.name;
 			this.age=params.age;
 		},
 		template:'<div style="font-size:20px;color:#ff6060;"><span data-bind="text:name"></span><span data-bind="text:age"></span></div>'
+	})
+	ko.components.register('my-message-editor',{
+		viewModel:function(params){
+//			console.log(params);
+			this.text=ko.observable(params&&params.initialText||'');
+			this.produce=ko.observable(params.produce);
+		},
+		template:'Message:<input data-bind="value:text"/>'
+				+'(length:<span data-bind="text:text().length+produce()"></span>)'
+	})
+	ko.components.register('my-message-editor2',{
+		template:'Message:<input data-bind="value:text"/>'
+				+'(length:<span data-bind="text:text.length+produce"></span>)'
+	})
+	ko.components.register('my-produces',{
+		viewModel:function(params){
+			this.produces=ko.observableArray(params.produces);
+		},
+		template:'<div data-bind="foreach:produces"><div style="font-size:20px;color:#ff6060;"><span data-bind="text:$data"></span></div></div>'
+	})
+	ko.components.register('my-produce',{
+		viewModel:function(params){
+			this.produce=ko.observable(params.produce);
+		},
+		template:'<div style="font-size:20px;color:green;"><span data-bind="text:produce()"></span></div>'
 	})
 	ko.applyBindings(vm,document.getElementById("container1"));
 	
@@ -308,6 +438,25 @@
 	]);
 	
 	var Vm=function(obj){
+		this.giftWrap=ko.observable(true);
+		this.seasons=ko.observableArray([
+			{ name: 'Spring', months: [ 'March', 'April', 'May' ] },
+            { name: 'Summer', months: [ 'June', 'July', 'August' ] },
+            { name: 'Autumn', months: [ 'September', 'October', 'November' ] },
+            { name: 'Winter', months: [ 'December', 'January', 'February' ] }
+		]),
+		this.people=[
+			{
+				name:'FrankLin',
+				credits:250
+			},
+			{
+				name:'Mario',
+				credits:5800
+			}
+		];
+		this.buyer={name:'FrankLin',credits:250};
+		this.seller={name:'Mario',credits:5800};
 		this.LastName=ko.observable("xiao");
 		this.FirstName=ko.observable("ming");
 		this.One=ko.observable("一");
@@ -329,17 +478,46 @@
 		};
 		this.FullName=ko.computed(function(){
 			var isFirstEvaluation = ko.computedContext.isInitial();
-			console.log(isFirstEvaluation);
+//			console.log(isFirstEvaluation);
 			return this.LastName()+this.FirstName();
 		},this)
 		this.FullName2=ko.computed(function(){
 			return this.LastName()+this.FirstName();
 		},this)
+		this.HandleName=function(event,index,element,context,parent,parentcontext,data){
+			console.log(event);
+        	console.log(index);
+        	console.log(element);
+        	console.log(context);
+        	console.log(parent);
+        	console.log(parentcontext);
+        	console.log(data);
+        	console.log(parentcontext.$index());
+		}
 	}
 	
 	List.extend({rateLimit:1000});
 	
+	ko.bindingHandlers.slideVisible={
+		update:function(element,valueAccessor,allBindings,bindingContext){
+			var value=valueAccessor();
+			var valueUnwrapped=ko.unwrap(value);
+			var duration=allBindings.get('slideDuration')||400;
+			var context=bindingContext;
+			console.log(element);
+			console.log(valueUnwrapped);
+			console.log(allBindings());
+			console.log(bindingContext);
+			if(valueUnwrapped==true){
+				$(element).slideDown(duration);
+			}else{
+				$(element).slideUp(duration);
+			}
+		}
+	}
 	ko.applyBindings(new Vm({name:"XIAOMING",age:4000}),document.getElementById("container2"));
+	
+	
 	
 </script>
 	
