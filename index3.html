@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	
+	<div>
+		<ul data-bind="foreach:products">
+			<li class="product">
+				<strong data-bind="text:name"></strong>
+				<like-widget params="value:userRating"></like-widget>
+			</li>
+		</ul>
+	</div>
+	
+	<script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+	<!--<script type="text/javascript" src="js/knockout.min-3.4.2.js"></script>-->
+	<script type="text/javascript" src="js/knockout.min.js"></script>
+	
+	<script>
+		
+		function Product(name,rating){
+			this.name=name;
+			this.userRating=ko.observable(rating||null);
+		}
+		
+		function Vm(){
+			this.products=[
+				new Product('Garlic bread'),
+				new Product('Pain au chocolat'),
+				new Product('Seagull spaghetti','like')
+			];
+		}
+		
+		ko.components.register('like-widget',{
+			viewModel:function(params){
+				this.chosenValue=params.value;
+				
+				this.like=function(){
+					this.chosenValue('like');
+				}.bind(this);
+				this.dislike=function(){
+					this.chosenValue('dislike');
+				}.bind(this);
+			},
+			template:
+				'<div class="like-or-dislike" data-bind="visible:!chosenValue()">\
+					<button data-bind="click:like">Like it</button>\
+					<button data-bind="click:dislike">Dislike it</button>\
+				</div>\
+				<div class="result" data-bind="visible:chosenValue">\
+					You <strong data-bind="text:chosenValue"></strong> it\
+				</div>'
+		});
+		
+		
+		ko.applyBindings(new Vm());
+		
+	</script>
+	
+</body>
+</html>

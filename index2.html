@@ -179,9 +179,52 @@
 			<div data-bind="visible:editingName">You're editing the name</div>
 			<button data-bind="enable:!editingName(),click:function(){editingName(true)}">Edit name</button>
 		</div>
+		<div>
+			<!-- ko mybinding: hasFocus --> ... <!-- /ko -->
+		</div>
+		<div>
+			<div data-bind="myText:text" class="myText" id="MyTxt"></div>
+		</div>
+		<div>
+			<div data-bind="allowBindings:true">
+				<div data-bind="text:'Replacement'">Original</div>
+			</div>
+			<div data-bind="allowBindings:false">
+				<div data-bind="text:'Replacement'">Original</div>
+			</div>
+		</div>
+		<div>
+			<div data-bind="withProperties: { emotion: 'happy' }">
+			    Today I feel <span data-bind="text: emotion"></span>. <!-- Displays: happy -->
+			</div>
+			<div data-bind="withProperties: { emotion: 'whimsical' }">
+			    Today I feel <span data-bind="text: emotion"></span>. <!-- Displays: whimsical -->
+			</div>
+		</div>
+		<div>
+			<div data-bind="withProperties: { displayMode: 'twoColumn' }">
+			    The outer display mode is <span data-bind="text: displayMode"></span>.
+			    <div data-bind="withProperties: { displayMode: 'doubleWidth' }">
+			        The inner display mode is <span data-bind="text: displayMode"></span>, but I haven't forgotten
+			        that the outer display mode is <span data-bind="text: $parentContext.displayMode"></span>.
+			    </div>
+			</div>
+		</div>
+		<div>
+			<div data-bind="randomOrder:true">
+				<div>First</div>
+				<div>Second</div>
+				<div>Third</div>
+			</div>
+		</div>
+		<div>
+			<!-- ko randomOrder: true -->
+				<div>First</div>
+				<div>Second</div>
+				<div>Third</div>
+			<!-- /ko -->
+		</div>
 	</div>
-	
-	
 	
 	<script type="text/html" id="person-template">
 		<h3 data-bind="text:name"></h3>
@@ -446,6 +489,7 @@
 	]);
 	
 	var Vm=function(obj){
+		this.text=ko.observable('');
 		this.editingName=ko.observable();
 		this.giftWrap=ko.observable(false);
 		this.seasons=ko.observableArray([
@@ -517,10 +561,10 @@
 			var valueUnwrapped=ko.unwrap(value);
 			var duration=allBindings.get('slideDuration')||400;
 			var context=bindingContext;
-			console.log(element);
-			console.log(valueUnwrapped);
-			console.log(allBindings());
-			console.log(bindingContext);
+//			console.log(element);
+//			console.log(valueUnwrapped);
+//			console.log(allBindings());
+//			console.log(bindingContext);
 			if(valueUnwrapped==true){
 				$(element).slideDown(duration);
 			}else{
@@ -550,9 +594,77 @@
 		}
 	}
 	
+	ko.bindingHandlers.myText={
+		init:function(element,valueAccessor,allBindings,bindingContext){
+			console.log(element);
+			console.log(valueAccessor());
+			var value=valueAccessor();
+			console.log(value("init"));
+			console.log(allBindings());
+			console.log(bindingContext);
+		},
+		update:function(element,valueAccessor,allBindings,bindingContext){
+			console.log(element);
+			console.log(ko.unwrap(valueAccessor()));
+			
+			console.log(allBindings());
+			console.log(bindingContext);
+		}
+	}
+	
+	ko.bindingHandlers.allowBindings={
+		init:function(elemnet,valueAccessor){
+			var shouldAllowBindings=ko.unwrap(valueAccessor());
+			return {controlsDescendantBindings:!shouldAllowBindings};
+		}
+	}
+	
+	ko.bindingHandlers.withProperties = {
+	    init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+	        var innerBindingContext = bindingContext.extend(valueAccessor);
+	        ko.applyBindingsToDescendants(innerBindingContext, element);
+	
+	        return { controlsDescendantBindings: true };
+	    }
+	};
+	
+	ko.bindingHandlers.withProperties = {
+	    init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+	        var childBindingContext = bindingContext.createChildContext(
+	            bindingContext.$rawData, 
+	            null, 
+	            function(context) {
+	                ko.utils.extend(context, valueAccessor());
+	            });
+	        ko.applyBindingsToDescendants(childBindingContext, element);
+	
+	        return { controlsDescendantBindings: true };
+	    }
+	};
+	
+	ko.bindingHandlers.randomOrder={
+		init:function(element,valueAccessor){
+			var child=ko.virtualElements.firstChild(element);
+			var childElems=[];
+			while(child){
+				childElems.push(child);
+				child=ko.virtualElements.nextSibling(child);
+			}
+			ko.virtualElements.emptyNode(element);
+			while(childElems.length){
+				var randomIndex=Math.floor(Math.random()*childElems.length),
+				chosenChild=childElems.splice(randomIndex,1);
+				ko.virtualElements.prepend(element,chosenChild[0]);
+			}
+		}
+	}
+	
+	ko.virtualElements.allowedBindings.randomOrder=true;	
+	
 	ko.applyBindings(new Vm({name:"XIAOMING",age:4000}),document.getElementById("container2"));
 	var oVm=new Vm({name:"XIAOMING",age:4000});
 	console.log(oVm.editingName());
+	console.log(oVm.text());
 </script>
 	
 </body>
