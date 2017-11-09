@@ -551,7 +551,8 @@
 	}
 	
 	ko.applyBindings(new Vm({name:"XIAOMING",age:4000}),document.getElementById("container2"));
-	
+	var oVm=new Vm({name:"XIAOMING",age:4000});
+	console.log(oVm.editingName());
 </script>
 	
 </body>
